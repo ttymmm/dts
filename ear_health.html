@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>听力健康评估</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            padding: 40px;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎧 听力健康评估</h2>
+
+    <label>年龄</label>
+    <input type="number" id="age">
+
+    <label>每日耳机使用时长（小时）</label>
+    <input type="number" id="hours" step="0.1">
+
+    <label>音量（0-100）</label>
+    <input type="number" id="volume">
+
+    <label>环境</label>
+    <select id="env">
+        <option value="0">安静</option>
+        <option value="1">嘈杂</option>
+    </select>
+
+    <label>是否连续使用超过1小时</label>
+    <select id="continuous">
+        <option value="0">否</option>
+        <option value="1">是</option>
+    </select>
+
+    <button onclick="calculate()">开始评估</button>
+
+    <div class="result" id="result" style="display:none;"></div>
+</div>
+
+<script>
+function calculate() {
+    let age = parseFloat(document.getElementById("age").value);
+    let hours = parseFloat(document.getElementById("hours").value);
+    let volume = parseFloat(document.getElementById("volume").value);
+    let env = parseInt(document.getElementById("env").value);
+    let continuous = parseInt(document.getElementById("continuous").value);
+
+    if (isNaN(age) || isNaN(hours) || isNaN(volume)) {
+        alert("请填写完整数据");
+        return;
+    }
+
+    let score = 
+        0.4 * hours +
+        0.3 * (volume / 100) +
+        0.2 * env +
+        0.1 * continuous;
+
+    let k = 5;
+    let extra_age = Math.min(score * k, 15);
+    let ear_age = (age + extra_age).toFixed(1);
+
+    let level = "";
+    if (score < 1) {
+        level = "低风险";
+    } else if (score < 2) {
+        level = "中等风险";
+    } else {
+        level = "高风险";
+    }
+
+    let advice = [];
+    if (hours > 2) advice.push("减少每日使用时间（建议 ≤2小时）");
+    if (volume > 60) advice.push("音量建议控制在60%以下");
+    if (continuous === 1) advice.push("每小时休息10分钟");
+    if (env === 1) advice.push("嘈杂环境建议使用降噪耳机");
+
+    if (advice.length === 0) {
+        advice.push("当前使用习惯较健康，请继续保持 👍");
+    }
+
+    let resultDiv = document.getElementById("result");
+    resultDiv.style.display = "block";
+    resultDiv.innerHTML = `
+        <b>耳朵年龄：</b>${ear_age} 岁（实际年龄 ${age} 岁）<br><br>
+        <b>听力风险：</b>${level}<br><br>
+        <b>风险评分：</b>${score.toFixed(2)}<br><br>
+        <b>建议：</b><br>${advice.join("<br>")}
+    `;
+}
+</script>
+
+</body>
+</html>
